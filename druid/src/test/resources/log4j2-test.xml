@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="off">
+  <Appenders>
+    <Console name="Console" target="SYSTEM_OUT">
+      <PatternLayout charset="UTF-8" pattern="%d %-5p [%t] %c{1.} (%F:%L) - %m%n"/>
+    </Console>
+  </Appenders>
+  <Loggers>
+    <Root level="DEBUG">
+      <AppenderRef ref="Console"/>
+    </Root>
+    <Logger name="org.springframework" level="INFO"/>
+    <Logger name="org.apache.commons" level="WARN"/>
+    <Logger name="org.apache.http" level="INFO"/>
+    <Logger name="com.hazelcast" level="INFO"/>
+    <Logger name="com.elinku.ums" level="DEBUG"/>
+  </Loggers>
+</Configuration>

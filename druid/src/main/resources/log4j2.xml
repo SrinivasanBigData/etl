@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- status=debug off可以查看log4j的装配过程 -->
+<configuration status="off">
+	<properties>
+		<property name="LOG_HOME">logs</property>
+		<!-- 日志备份目录 -->
+		<property name="BACKUP_HOME">{LOG_HOME}/back</property>
+		<property name="STAT_NAME">stat</property>
+		<property name="SERVER_NAME">global</property>
+	</properties>
+	<appenders>
+		<!-- 定义控制台输出 -->
+		<Console name="Console" target="SYSTEM_OUT">
+			 <PatternLayout charset="UTF-8" pattern="%d{MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+		</Console>
+		
+	</appenders>
+	<loggers>
+		<!-- 3rdparty Loggers -->
+		<logger name="org.springframework.core" level="@log4j.level@">
+		</logger>
+		<logger name="org.springframework.beans" level="@log4j.level@">
+		</logger>
+		<logger name="org.springframework.context" level="@log4j.level@">
+		</logger>
+		<logger name="org.springframework.web" level="@log4j.level@">
+		</logger>
+
+		<!-- Root Logger -->
+		<root level="info">
+			<appender-ref ref="Console"/>
+		</root>
+	</loggers>
+</configuration>
