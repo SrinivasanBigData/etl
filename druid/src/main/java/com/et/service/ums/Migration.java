@@ -1,5 +1,7 @@
 package com.et.service.ums;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -9,6 +11,9 @@ import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,44 +32,62 @@ public class Migration implements Runnable {
   private static Connection mariaConnection;
 
   /** 间隔 */
-  private static final int STEP = 100;
+  private static final int STEP = 10000;
   /** 查询起始值 */
-  private static long start = 0 - STEP;
+  private static AtomicInteger start = new AtomicInteger(0);
 
   private static final int THREAD_MAX = 20;
-  private static int threadNum = 0;
+  private static AtomicInteger threadNum = new AtomicInteger(0);
+
+  private static ExecutorService threadPool;
+
+  private static long begin;
+
+  private static Date d1;
+
+  private static Date d2;
 
   public static void main(String arg[]) throws Exception {
     mysqlConnection = getMysqlConnection();
     mariaConnection = getMariaConnection();
-    newThread();
-  }
+    mariaConnection.setAutoCommit(false);
 
-  /** 开启进程 */
-  private synchronized static void newThread() {
-    if (threadNum < THREAD_MAX) {
-      threadNum++;
-      Thread thread = new Thread(new Migration());
-      thread.start();
+    begin = System.currentTimeMillis();
+
+     SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss,SSS");
+     d1 = fmt.parse("2016-01-15 08:00:00,000");
+     d2 = fmt.parse("2016-01-15 09:00:00,000");
+//    SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
+//    d1 = fmt.parse(arg[0]);
+//    d2 = fmt.parse(arg[1]);
+    log.info("from {} to {} , [{},{})",arg[0],arg[1],d1.getTime(),d2.getTime());
+
+    threadPool = Executors.newFixedThreadPool(THREAD_MAX);
+    for (int i = 0; i < THREAD_MAX; i++) {
+      threadPool.execute(new Migration());
+    }
+
+    BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
+    while (true) {
+      String command = reader.readLine();
+      switch (command) {
+        case "show":
+          System.out.println(threadPool.isTerminated());
+          System.out.println(threadPool.isShutdown());
+          break;
+        default:
+          break;
+      }
+
     }
   }
 
-  private synchronized long threadStart() {
-    start += STEP;
-    return start;
-  }
-
-  private synchronized void threadEnd() {
-    threadNum--;
-  }
-
-  private void execute() throws SQLException, ParseException {
-    long i = threadStart();
-    log.info("thread start :{}", i);
+  /** 如果查不到数据，则返回false */
+  private boolean execute() throws SQLException, ParseException {
+    long i = start.getAndAdd(STEP);
+    log.info("thread start ======================{}", i);
     long start = System.currentTimeMillis();
-    SimpleDateFormat fmt = new SimpleDateFormat("yyyy-MM-dd");
-    Date d1 = fmt.parse("2016-01-01");
-    Date d2 = fmt.parse("2016-01-02");
+
     // 查询mysql记录
     String sql = "SELECT * from TT_MT where SP_MT_ID >= ? and sp_mt_id < ? limit ?,?";
     PreparedStatement stmt = mysqlConnection.prepareStatement(sql);
@@ -75,18 +98,19 @@ public class Migration implements Runnable {
     ResultSet rs = stmt.executeQuery();
     log.info("query cost time:{}", System.currentTimeMillis() - start);
 
+    boolean result = true;
     if (rs.next()) {
-      // 开新线程
-      newThread();
       // 插入到maria
       insert(rs);
+    } else {
+      result = false;
     }
 
 
     rs.close();
     stmt.close();
 
-    threadEnd();
+    return result;
   }
 
   /**
@@ -132,7 +156,7 @@ public class Migration implements Runnable {
   private static Connection getMariaConnection() {
     String driver = "org.mariadb.jdbc.Driver";
     String url =
-        "jdbc:mariadb://10.1.0.189:3306/ums?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false";
+        "jdbc:mariadb://10.1.0.189:3306/ums?useUnicode=true&characterEncoding=utf8&autoReconnect=true&failOverReadOnly=false&useServerPrepStmts=false&rewriteBatchedStatements=true";
     String user = "ums";
     String password = "ums20150519";
     return getConnection(driver, url, user, password);
@@ -153,11 +177,18 @@ public class Migration implements Runnable {
 
   @Override
   public void run() {
-    try {
-      this.execute();
-    } catch (SQLException | ParseException e) {
-      e.printStackTrace();
+    boolean result = true;
+    while (result) {
+      try {
+        result = this.execute();
+      } catch (SQLException | ParseException e) {
+        e.printStackTrace();
+      }
     }
 
+    log.info("thread finished, total cost time:{}", System.currentTimeMillis() - begin);
+    if (threadNum.incrementAndGet() >= THREAD_MAX) {
+      System.exit(0);
+    }
   }
 }
