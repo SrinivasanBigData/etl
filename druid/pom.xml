@@ -14,6 +14,11 @@
 		<tag>HEAD</tag>
 	</scm>
 
+	<issueManagement>
+		<url>http://git.oschina.net/swelltt/etl/issues</url>
+		<system>oschina Issues</system>
+	</issueManagement>
+
 	<build>
 		<!--唯一版本号 -->
 		<finalName>${project.artifactId}-${project.version}-r${buildNumber}</finalName>
@@ -93,6 +98,12 @@
 						</goals>
 					</execution>
 				</executions>
+			</plugin>
+			<!-- change log -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-changelog-plugin</artifactId>
+				<version>2.3</version>
 			</plugin>
 		</plugins>
 	</build>
