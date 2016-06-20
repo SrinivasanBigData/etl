@@ -31,8 +31,6 @@ import com.alibaba.druid.pool.DruidDataSource;
  * JpaConfig
  *
  * @author JoeHe
- * @class com.et.config.MongoConfig
- * @date 2014年8月7日 上午8:57:50
  * @since 1.0
  */
 @Configuration

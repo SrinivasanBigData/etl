@@ -17,8 +17,6 @@ import org.slf4j.LoggerFactory;
  * Migration 数据迁移
  *
  * @author wxu
- * @class com.et.service.qq.Migration
- * @date 2016年1月4日 上午11:26:12
  * @since 1.0
  */
 public class Migration {

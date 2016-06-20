@@ -14,8 +14,6 @@ import org.springframework.core.env.Environment;
  * AppConfig
  *
  * @author JoeHe
- * @class com.et.config.AppConfig
- * @date 2014年8月7日 上午8:58:22
  * @since 1.0
  */
 @Configuration
