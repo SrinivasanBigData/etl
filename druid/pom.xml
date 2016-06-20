@@ -8,12 +8,13 @@
 	<packaging>war</packaging>
 
 	<scm>
-		<connection>scm:git:https://github.com/swelltt0576/etl</connection>
-		<developerConnection>scm:git:https://github.com/swelltt0576/etl</developerConnection>
-		<url>https://github.com/swelltt0576/etl</url>
+		<connection>scm:git:http://git.oschina.net/swelltt/etl</connection>
+		<developerConnection>scm:git:http://git.oschina.net/swelltt/etl</developerConnection>
+		<url>http://git.oschina.net/swelltt/etl</url>
 	</scm>
 	
 	<build>
+		<!--唯一版本号-->
 		<finalName>${project.artifactId}-${project.version}-r${buildNumber}</finalName>
 
 		<plugins>
@@ -33,6 +34,8 @@
 					<shortRevisionLength>5</shortRevisionLength>
 				</configuration>
 			</plugin>
+			
+			<!--JDK版本-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
@@ -46,6 +49,8 @@
 					<showDeprecation>true</showDeprecation>
 				</configuration>
 			</plugin>
+			
+			<!--资源字符编码-->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-resources-plugin</artifactId>
@@ -54,6 +59,8 @@
 					<encoding>UTF-8</encoding>
 				</configuration>
 			</plugin>
+			
+			<!--WAR包，web.xml不存在时，不报错；java-config使用-->
 			<plugin>
 				<artifactId>maven-war-plugin</artifactId>
 				<version>2.3</version>
@@ -61,6 +68,28 @@
 					<failOnMissingWebXml>false</failOnMissingWebXml>
 				</configuration>
 			</plugin>
+			
+			<!--java doc 字符编码-->
+			<plugin>   
+          <groupId>org.apache.maven.plugins</groupId>  
+          <artifactId>maven-javadoc-plugin</artifactId>  
+          <version>2.10.2</version>  
+          <configuration>  
+              <aggregate>true</aggregate>  
+              <charset>UTF-8</charset>
+              <encoding>UTF-8</encoding>
+              <docencoding>UTF-8</docencoding>
+              <outputEncoding>UTF-8</outputEncoding>
+          </configuration>  
+          <executions>   
+              <execution>  
+                  <id>attach-javadocs</id>  
+                  <goals>  
+                      <goal>jar</goal>  
+                  </goals> 
+              </execution>  
+          </executions>  
+      </plugin> 
 		</plugins>
 	</build>
 
