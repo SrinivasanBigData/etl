@@ -18,7 +18,7 @@ public class AppConfigTest {
   @Autowired
   private DataSource dataSource;
 
-  @Test
+//  @Test
   public void test() throws Exception {
     System.out.println(dataSource);
 
